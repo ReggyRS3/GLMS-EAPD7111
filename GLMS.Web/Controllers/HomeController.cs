@@ -1,21 +1,48 @@
+using System.Diagnostics;
+using GLMS.Web.Data;
 using GLMS.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace GLMS.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly GlmsDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(GlmsDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            ViewData["ActiveCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.Active);
+            ViewData["OnHoldCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.OnHold);
+            ViewData["ExpiredCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.Expired);
+            ViewData["PendingCount"] = await _context.ServiceRequests.CountAsync(s => s.Status == ServiceRequestStatus.Pending);
+
+            var alerts = await _context.ManagerAlerts
+                .Where(a => !a.IsDismissed)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(10)
+                .ToListAsync();
+
+            return View(alerts);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DismissAlert(int id)
+        {
+            var alert = await _context.ManagerAlerts.FindAsync(id);
+            if (alert != null)
+            {
+                alert.IsDismissed = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()

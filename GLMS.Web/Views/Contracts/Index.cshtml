@@ -1,0 +1,103 @@
+﻿@model IEnumerable<GLMS.Web.Models.Contract>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Cont</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-3">
+        <label for="fromDate" class="form-label">From</label>
+        <input type="date" id="fromDate" name="fromDate" value="@ViewData["FromDate"]" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="toDate" class="form-label">To</label>
+        <input type="date" id="toDate" name="toDate" value="@ViewData["ToDate"]" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label for="status" class="form-label">Status</label>
+        <select id="status" name="status" class="form-select">
+            <option value="">All statuses</option>
+            @foreach (var s in Enum.GetValues<ContractStatus>())
+            {
+                <option value="@s" selected="@(Equals(ViewData["Status"], s))">@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+    </div>
+</form>
+
+@if (ViewData["FilterError"] != null)
+{
+    <div class="alert alert-warning">@ViewData["FilterError"]</div>
+}
+
+<p class="text-muted">@Model.Count() contract(s) found</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Client)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ServiceLevel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.SignedAgreementPath)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+            <tr>
+                
+            <td>
+                    @item.Client?.Name
+            <td>
+                @Html.DisplayFor(modelItem => item.StartDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EndDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ServiceLevel)
+            </td>
+            <td>
+                        @if (!string.IsNullOrEmpty(item.SignedAgreementPath))
+                        {
+                        <a asp-action="DownloadAgreement" asp-route-id="@item.ContractId">Download</a>
+                        }
+                        else
+                        {
+                        <span class="text-muted">None</span>
+                        }
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ContractId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ContractId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ContractId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

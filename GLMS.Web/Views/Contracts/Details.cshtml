@@ -1,0 +1,121 @@
+﻿@model GLMS.Web.Models.Contract
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Contract</h4>
+<hr />
+<h4>Signed agreement</h4>
+<form asp-action="UploadAgreement" asp-route-id="@Model.ContractId" method="post"
+      enctype="multipart/form-data" class="mb-3">
+    <div class="input-group" style="max-width: 520px;">
+        <input type="file" name="agreementFile" accept=".pdf,application/pdf" class="form-control" />
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </div>
+    <small class="text-muted">PDF only, maximum 10 MB. Uploading again replaces the current file.</small>
+</form>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Client)
+        </dt>
+        <dd class = "col-sm-10">
+            @Model.Client?.Name
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EndDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EndDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.ServiceLevel)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.ServiceLevel)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.SignedAgreementPath)
+        </dt>
+        <dd class = "col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.SignedAgreementPath))
+            {
+                <a asp-action="DownloadAgreement" asp-route-id="@Model.ContractId">Download PDF</a>
+            }
+            else
+            {
+                <span class="text-muted">Not uploaded</span>
+            }
+        </dd>
+    </dl>
+</div>
+<hr />
+<h4>Contract status</h4>
+<p>
+    Current status: <strong>@Model.Status</strong><br />
+    Service requests allowed: <strong>@(Model.CanRaiseServiceRequest() ? "Yes" : "No")</strong>
+</p>
+<form asp-action="ChangeStatus" asp-route-id="@Model.ContractId" method="post" class="mb-3">
+    <button type="submit" name="command" value="activate" class="btn btn-success">Activate</button>
+    <button type="submit" name="command" value="hold" class="btn btn-warning">Put on hold</button>
+    <button type="submit" name="command" value="expire" class="btn btn-danger">Expire</button>
+</form>
+
+@if (Model.CanRaiseServiceRequest())
+{
+    <a asp-controller="ServiceRequests" asp-action="Create" asp-route-contractId="@Model.ContractId"
+       class="btn btn-primary mb-3">Raise service request</a>
+}
+
+@{
+    var history = ViewData["History"] as List<GLMS.Web.Models.ContractAuditLog>;
+}
+<hr />
+<h4>Status history</h4>
+@if (history == null || history.Count == 0)
+{
+    <p class="text-muted">No status changes recorded yet.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Changed</th>
+                <th>From</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in history)
+            {
+                <tr>
+                    <td>@entry.ChangedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@entry.OldStatus</td>
+                    <td>@entry.NewStatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.ContractId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
