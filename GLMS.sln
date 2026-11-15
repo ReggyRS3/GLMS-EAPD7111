@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLMS.Web", "GLMS.Web\GLMS.Web.csproj", "{2966A313-9B16-4523-8195-D5EE7E0B185F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLMS.Web", "GLMS.Web\GLMS.Web.csproj", "{2966A313-9B16-4523-8195-D5EE7E0B185F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLMS.Test", "GLMS.Test\GLMS.Test.csproj", "{95CB87FD-32A3-4789-B798-E67EB6A71ED2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLMS.Test", "GLMS.Test\GLMS.Test.csproj", "{95CB87FD-32A3-4789-B798-E67EB6A71ED2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLMS.Api", "GLMS.Api\GLMS.Api.csproj", "{8BFA696A-8C1E-4845-9300-520C9A908A21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{95CB87FD-32A3-4789-B798-E67EB6A71ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95CB87FD-32A3-4789-B798-E67EB6A71ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95CB87FD-32A3-4789-B798-E67EB6A71ED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BFA696A-8C1E-4845-9300-520C9A908A21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BFA696A-8C1E-4845-9300-520C9A908A21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BFA696A-8C1E-4845-9300-520C9A908A21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BFA696A-8C1E-4845-9300-520C9A908A21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
