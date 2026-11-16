@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Contracts;
 
 namespace GLMS.Web.Models
 {
@@ -18,7 +17,5 @@ namespace GLMS.Web.Models
 
         [Required, StringLength(50)]
         public string Region { get; set; } = string.Empty;
-
-        public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
     }
 }

@@ -1,31 +1,40 @@
 using System.Globalization;
-using GLMS.Web.Data;
 using GLMS.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddDbContext<GlmsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
-
-// Adapter pattern: HttpClient is injected into the adapter that calls the currency API
-builder.Services.AddMemoryCache();
-builder.Services.AddHttpClient<ICurrencyConverter, ExchangeRateApiAdapter>(client =>
+// Every page needs a logged-in user, except pages marked [AllowAnonymous]
+builder.Services.AddControllersWithViews(options =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["ExchangeRateApi:BaseUrl"] ?? "https://open.er-api.com/v6/");
-    client.Timeout = TimeSpan.FromSeconds(10);
+    options.Filters.Add(new AuthorizeFilter());
+    options.Filters.Add<ApiUnauthorizedFilter>();
 });
 
-builder.Services.AddScoped<ServiceRequestService>();
+// Login cookie; the JWT from the API is stored inside it
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = false;
+    });
+
+// HttpClient to the GLMS API, with the JWT added to every request
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<BearerTokenHandler>();
+builder.Services.AddHttpClient<GlmsApiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7265/");
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.AddHttpMessageHandler<BearerTokenHandler>();
 
 var app = builder.Build();
 
-// South African formats, but with "." as the decimal separator so amounts like 12.50 are accepted
+// South African formats, but with "." as the decimal separator
 var culture = (CultureInfo)CultureInfo.GetCultureInfo("en-ZA").Clone();
 culture.NumberFormat.NumberDecimalSeparator = ".";
 culture.NumberFormat.CurrencyDecimalSeparator = ".";
@@ -39,14 +48,13 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

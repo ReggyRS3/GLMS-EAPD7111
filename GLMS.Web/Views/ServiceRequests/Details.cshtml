@@ -1,60 +1,35 @@
 ﻿@model GLMS.Web.Models.ServiceRequest
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Service request details";
 }
 
-<h1>Details</h1>
+<h1>Service request #@Model.ServiceRequestId</h1>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">Contract</dt>
+    <dd class="col-sm-9">#@Model.ContractId - @Model.ClientName</dd>
+
+    <dt class="col-sm-3">Description</dt>
+    <dd class="col-sm-9">@Model.Description</dd>
+
+    <dt class="col-sm-3">Cost (USD)</dt>
+    <dd class="col-sm-9">$@Model.CostUsd.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Exchange Rate</dt>
+    <dd class="col-sm-9">@Model.ExchangeRate.ToString("0.0000")</dd>
+
+    <dt class="col-sm-3">Cost (ZAR)</dt>
+    <dd class="col-sm-9">R @Model.CostZar.ToString("N2")</dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+
+    <dt class="col-sm-3">Created</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+</dl>
 
 <div>
-    <h4>ServiceRequest</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @($"#{Model.ContractId} - {Model.Contract?.Client?.Name}")
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Contract.ServiceLevel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CostUsd)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CostUsd)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExchangeRate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExchangeRate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CostZar)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CostZar)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ServiceRequestId">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.ServiceRequestId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

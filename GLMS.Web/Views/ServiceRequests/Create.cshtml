@@ -1,37 +1,40 @@
 ﻿@model GLMS.Web.Models.ServiceRequest
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Raise Service Request";
+    var usdToZarRate = ViewData["UsdToZarRate"] as decimal?;
 }
 
 <h1>Raise Service Request</h1>
-
-<h4>ServiceRequest</h4>
+<p class="text-muted">Requests can only be raised against Active contracts.</p>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ContractId" class="control-label"></label>
-                <select asp-for="ContractId" class ="form-control" asp-items="ViewBag.ContractId"></select>
+
+            <div class="mb-3">
+                <label asp-for="ContractId" class="form-label"></label>
+                <select asp-for="ContractId" class="form-select" asp-items="ViewBag.ContractId">
+                    <option value="">-- Select a contract --</option>
+                </select>
+                <span asp-validation-for="ContractId" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="CostUsd" class="control-label"></label>
-                <input asp-for="CostUsd" class="form-control" />
+
+            <div class="mb-3">
+                <label asp-for="CostUsd" class="form-label"></label>
+                <input asp-for="CostUsd" type="number" step="0.01" min="0.01" class="form-control" />
                 <span asp-validation-for="CostUsd" class="text-danger"></span>
             </div>
 
-            @{
-                var usdToZarRate = ViewData["UsdToZarRate"] as decimal?;
-            }
-            <div class="form-group mb-3">
-                <label class="control-label">Cost (ZAR)</label>
+            <div class="mb-3">
+                <label class="form-label">Cost (ZAR)</label>
                 <input id="costZarPreview" class="form-control" readonly />
                 @if (usdToZarRate.HasValue)
                 {
@@ -45,16 +48,11 @@
                     <small class="text-warning">The live rate is unavailable right now. The ZAR cost will be calculated when you save.</small>
                 }
             </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-action="Index" class="ms-2">Back to List</a>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
@@ -64,7 +62,7 @@
 
     <script>
         (function () {
-            const rate = @((ViewData["UsdToZarRate"] as decimal?)?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null");
+            const rate = @(usdToZarRate?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null");
             const usdInput = document.getElementById("CostUsd");
             const zarOutput = document.getElementById("costZarPreview");
 

@@ -1,13 +1,38 @@
 ﻿@model GLMS.Web.Models.Contract
-
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Contract details";
+    var history = ViewData["History"] as List<GLMS.Web.Models.ContractAuditLog>;
 }
 
-<h1>Details</h1>
+<h1>Contract #@Model.ContractId</h1>
+<hr />
 
-<div>
-    <h4>Contract</h4>
+<dl class="row">
+    <dt class="col-sm-3">Client</dt>
+    <dd class="col-sm-9">@Model.ClientName</dd>
+
+    <dt class="col-sm-3">Start Date</dt>
+    <dd class="col-sm-9">@Model.StartDate.ToString("yyyy-MM-dd")</dd>
+
+    <dt class="col-sm-3">End Date</dt>
+    <dd class="col-sm-9">@Model.EndDate.ToString("yyyy-MM-dd")</dd>
+
+    <dt class="col-sm-3">Service Level</dt>
+    <dd class="col-sm-9">@Model.ServiceLevel</dd>
+
+    <dt class="col-sm-3">Signed Agreement</dt>
+    <dd class="col-sm-9">
+        @if (Model.HasSignedAgreement)
+        {
+            <a asp-action="DownloadAgreement" asp-route-id="@Model.ContractId">Download PDF</a>
+        }
+        else
+        {
+            <span class="text-muted">Not uploaded</span>
+        }
+    </dd>
+</dl>
+
 <hr />
 <h4>Signed agreement</h4>
 <form asp-action="UploadAgreement" asp-route-id="@Model.ContractId" method="post"
@@ -18,58 +43,12 @@
     </div>
     <small class="text-muted">PDF only, maximum 10 MB. Uploading again replaces the current file.</small>
 </form>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Client)
-        </dt>
-        <dd class = "col-sm-10">
-            @Model.Client?.Name
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ServiceLevel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ServiceLevel)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SignedAgreementPath)
-        </dt>
-        <dd class = "col-sm-10">
-            @if (!string.IsNullOrEmpty(Model.SignedAgreementPath))
-            {
-                <a asp-action="DownloadAgreement" asp-route-id="@Model.ContractId">Download PDF</a>
-            }
-            else
-            {
-                <span class="text-muted">Not uploaded</span>
-            }
-        </dd>
-    </dl>
-</div>
+
 <hr />
 <h4>Contract status</h4>
 <p>
     Current status: <strong>@Model.Status</strong><br />
-    Service requests allowed: <strong>@(Model.CanRaiseServiceRequest() ? "Yes" : "No")</strong>
+    Service requests allowed: <strong>@(Model.CanRaiseServiceRequest ? "Yes" : "No")</strong>
 </p>
 <form asp-action="ChangeStatus" asp-route-id="@Model.ContractId" method="post" class="mb-3">
     <button type="submit" name="command" value="activate" class="btn btn-success">Activate</button>
@@ -77,15 +56,12 @@
     <button type="submit" name="command" value="expire" class="btn btn-danger">Expire</button>
 </form>
 
-@if (Model.CanRaiseServiceRequest())
+@if (Model.CanRaiseServiceRequest)
 {
     <a asp-controller="ServiceRequests" asp-action="Create" asp-route-contractId="@Model.ContractId"
        class="btn btn-primary mb-3">Raise service request</a>
 }
 
-@{
-    var history = ViewData["History"] as List<GLMS.Web.Models.ContractAuditLog>;
-}
 <hr />
 <h4>Status history</h4>
 @if (history == null || history.Count == 0)
@@ -116,6 +92,6 @@ else
 }
 
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.ContractId">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.ContractId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

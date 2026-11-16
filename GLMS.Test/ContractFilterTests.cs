@@ -1,5 +1,5 @@
-﻿using GLMS.Web.Models;
-using GLMS.Web.Services;
+﻿using GLMS.Api.Models;
+using GLMS.Api.Services;
 using Xunit;
 
 namespace GLMS.Test

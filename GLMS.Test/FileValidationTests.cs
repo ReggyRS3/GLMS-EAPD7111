@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using GLMS.Web.Services;
+using GLMS.Api.Services;
 using Xunit;
 
 namespace GLMS.Test

@@ -1,71 +1,44 @@
 ﻿@model IEnumerable<GLMS.Web.Models.ServiceRequest>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Service Requests";
 }
 
-<h1>Service Request</h1>
+<h1>Service Requests</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Contract)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CostUsd)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExchangeRate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CostZar)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
+            <th>Contract</th>
+            <th>Description</th>
+            <th>Cost (USD)</th>
+            <th>Exchange Rate</th>
+            <th>Cost (ZAR)</th>
+            <th>Status</th>
+            <th>Created</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                    @($"#{item.ContractId} - {item.Contract?.Client?.Name}")
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CostUsd)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExchangeRate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CostZar)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ServiceRequestId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ServiceRequestId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ServiceRequestId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>#@item.ContractId - @item.ClientName</td>
+                <td>@item.Description</td>
+                <td>$@item.CostUsd.ToString("N2")</td>
+                <td>@item.ExchangeRate.ToString("0.0000")</td>
+                <td>R @item.CostZar.ToString("N2")</td>
+                <td>@item.Status</td>
+                <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ServiceRequestId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.ServiceRequestId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ServiceRequestId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

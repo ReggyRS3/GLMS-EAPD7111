@@ -92,7 +92,7 @@ namespace GLMS.Api.Dtos
         [Required, StringLength(500)]
         public string Description { get; set; } = string.Empty;
 
-        [Range(typeof(decimal), "0.01", "10000000", ErrorMessage = "Cost must be between 0.01 and 10,000,000 USD.")]
+        [Range(0.01, 10000000, ErrorMessage = "Cost must be between 0.01 and 10,000,000 USD.")]
         public decimal CostUsd { get; set; }
     }
 

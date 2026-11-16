@@ -1,4 +1,4 @@
-﻿using GLMS.Web.Models;
+﻿using GLMS.Api.Models;
 using Xunit;
 
 namespace GLMS.Test

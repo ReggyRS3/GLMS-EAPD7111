@@ -1,5 +1,5 @@
-﻿using GLMS.Web.Models;
-using GLMS.Web.Patterns.Observer;
+﻿using GLMS.Api.Models;
+using GLMS.Api.Patterns.Observer;
 
 namespace GLMS.Test.Fakes
 {

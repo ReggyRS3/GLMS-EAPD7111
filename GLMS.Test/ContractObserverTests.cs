@@ -1,6 +1,6 @@
 ﻿using GLMS.Test.Fakes;
-using GLMS.Web.Models;
-using GLMS.Web.Patterns.Observer;
+using GLMS.Api.Models;
+using GLMS.Api.Patterns.Observer;
 using Xunit;
 
 namespace GLMS.Test

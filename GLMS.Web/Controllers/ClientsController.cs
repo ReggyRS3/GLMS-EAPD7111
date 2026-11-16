@@ -1,157 +1,100 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using GLMS.Web.Models;
+using GLMS.Web.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GLMS.Web.Data;
-using GLMS.Web.Models;
 
 namespace GLMS.Web.Controllers
 {
     public class ClientsController : Controller
     {
-        private readonly GlmsDbContext _context;
+        private readonly GlmsApiClient _api;
 
-        public ClientsController(GlmsDbContext context)
+        public ClientsController(GlmsApiClient api)
         {
-            _context = context;
+            _api = api;
         }
 
-        // GET: Clients
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Clients.ToListAsync());
+            return View(await _api.GetClientsAsync());
         }
 
-        // GET: Clients/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return View(client);
+            var client = await _api.GetClientAsync(id);
+            return client == null ? NotFound() : View(client);
         }
 
-        // GET: Clients/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Clients/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClientId,Name,ContactEmail,ContactPhone,Region")] Client client)
+        public async Task<IActionResult> Create([Bind("Name,ContactEmail,ContactPhone,Region")] Client client)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid) return View(client);
+
+            try
             {
-                _context.Add(client);
-                await _context.SaveChangesAsync();
+                await _api.CreateClientAsync(client);
+                TempData["Success"] = "Client created.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(client);
+            catch (ApiException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(client);
+            }
         }
 
-        // GET: Clients/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients.FindAsync(id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-            return View(client);
+            var client = await _api.GetClientAsync(id);
+            return client == null ? NotFound() : View(client);
         }
 
-        // POST: Clients/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ClientId,Name,ContactEmail,ContactPhone,Region")] Client client)
         {
-            if (id != client.ClientId)
-            {
-                return NotFound();
-            }
+            if (id != client.ClientId) return NotFound();
+            if (!ModelState.IsValid) return View(client);
 
-            if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    _context.Update(client);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ClientExists(client.ClientId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _api.UpdateClientAsync(client);
+                TempData["Success"] = "Client updated.";
                 return RedirectToAction(nameof(Index));
             }
-            return View(client);
+            catch (ApiException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(client);
+            }
         }
 
-        // GET: Clients/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(m => m.ClientId == id);
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return View(client);
+            var client = await _api.GetClientAsync(id);
+            return client == null ? NotFound() : View(client);
         }
 
-        // POST: Clients/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
-            if (client != null)
+            try
             {
-                _context.Clients.Remove(client);
+                await _api.DeleteClientAsync(id);
+                TempData["Success"] = "Client deleted.";
+            }
+            catch (ApiException ex)
+            {
+                TempData["Error"] = ex.Message;
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ClientExists(int id)
-        {
-            return _context.Clients.Any(e => e.ClientId == id);
         }
     }
 }

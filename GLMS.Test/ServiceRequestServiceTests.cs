@@ -1,6 +1,6 @@
 ﻿using GLMS.Test.Fakes;
-using GLMS.Web.Models;
-using GLMS.Web.Services;
+using GLMS.Api.Models;
+using GLMS.Api.Services;
 using Xunit;
 
 namespace GLMS.Test
@@ -9,7 +9,7 @@ namespace GLMS.Test
     {
         private const decimal FixedRate = 18.50m;
 
-        private static async Task<(ServiceRequestService Service, Web.Data.GlmsDbContext Context)> CreateServiceWithContract(ContractStatus status)
+        private static async Task<(ServiceRequestService Service, Api.Data.GlmsDbContext Context)> CreateServiceWithContract(ContractStatus status)
         {
             var context = TestDbContextFactory.Create();
             context.Contracts.Add(new Contract

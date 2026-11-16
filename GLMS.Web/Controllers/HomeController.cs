@@ -1,55 +1,47 @@
 using System.Diagnostics;
-using GLMS.Web.Data;
 using GLMS.Web.Models;
+using GLMS.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GLMS.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly GlmsDbContext _context;
+        private readonly GlmsApiClient _api;
 
-        public HomeController(GlmsDbContext context)
+        public HomeController(GlmsApiClient api)
         {
-            _context = context;
+            _api = api;
         }
 
         public async Task<IActionResult> Index()
         {
-            ViewData["ActiveCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.Active);
-            ViewData["OnHoldCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.OnHold);
-            ViewData["ExpiredCount"] = await _context.Contracts.CountAsync(c => c.Status == ContractStatus.Expired);
-            ViewData["PendingCount"] = await _context.ServiceRequests.CountAsync(s => s.Status == ServiceRequestStatus.Pending);
+            var dashboard = await _api.GetDashboardAsync();
 
-            var alerts = await _context.ManagerAlerts
-                .Where(a => !a.IsDismissed)
-                .OrderByDescending(a => a.CreatedAt)
-                .Take(10)
-                .ToListAsync();
+            ViewData["ActiveCount"] = dashboard.ActiveCount;
+            ViewData["OnHoldCount"] = dashboard.OnHoldCount;
+            ViewData["ExpiredCount"] = dashboard.ExpiredCount;
+            ViewData["PendingCount"] = dashboard.PendingCount;
 
-            return View(alerts);
+            return View(dashboard.Alerts);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DismissAlert(int id)
         {
-            var alert = await _context.ManagerAlerts.FindAsync(id);
-            if (alert != null)
-            {
-                alert.IsDismissed = true;
-                await _context.SaveChangesAsync();
-            }
-
+            await _api.DismissAlertAsync(id);
             return RedirectToAction(nameof(Index));
         }
 
+        [AllowAnonymous]
         public IActionResult Privacy()
         {
             return View();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

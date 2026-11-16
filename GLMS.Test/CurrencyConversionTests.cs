@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Net;
 using GLMS.Test.Fakes;
-using GLMS.Web.Services;
+using GLMS.Api.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
