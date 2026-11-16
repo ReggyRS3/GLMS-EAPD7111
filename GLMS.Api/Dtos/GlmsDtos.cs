@@ -129,7 +129,22 @@ namespace GLMS.Api.Dtos
         public string To { get; set; } = "ZAR";
         public decimal Rate { get; set; }
     }
+    // ---------- Authentication ----------
+    public class LoginDto
+    {
+        [Required]
+        public string Username { get; set; } = string.Empty;
 
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class LoginResponseDto
+    {
+        public string Token { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public DateTime ExpiresAt { get; set; }
+    }
     // ---------- Model -> DTO conversion ----------
     public static class DtoMappings
     {

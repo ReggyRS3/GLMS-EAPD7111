@@ -1,18 +1,64 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using GLMS.Api.Data;
+using GLMS.Api.Models;
 using GLMS.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Controllers return JSON; enums are sent as text ("Active") instead of numbers
-builder.Services.AddControllers()
+// Every endpoint needs a valid token unless it is marked [AllowAnonymous]
+builder.Services.AddControllers(options => options.Filters.Add(new AuthorizeFilter()))
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-// Swagger: self-documenting, testable API
+// Swagger with an "Authorize" button for the JWT token
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the token from POST /api/auth/login"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// JWT authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+builder.Services.AddScoped<TokenService>();
 
 // The API is the only part of the system that talks to the database
 builder.Services.AddDbContext<GlmsDbContext>(options =>
@@ -34,19 +80,39 @@ builder.Services.AddScoped<ServiceRequestService>();
 
 var app = builder.Build();
 
-// Create or update the database on start-up (needed for Docker, where the database starts empty)
+// Create/update the database and make sure an admin user exists
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GlmsDbContext>();
+
     if (db.Database.IsRelational())
     {
         db.Database.Migrate();
+    }
+    else
+    {
+        db.Database.EnsureCreated(); // used by the integration tests
+    }
+
+    if (!db.Users.Any())
+    {
+        var admin = new AppUser
+        {
+            Username = app.Configuration["SeedAdmin:Username"] ?? "admin",
+            Role = "Admin"
+        };
+        admin.PasswordHash = new PasswordHasher<AppUser>()
+            .HashPassword(admin, app.Configuration["SeedAdmin:Password"] ?? "Admin@123");
+
+        db.Users.Add(admin);
+        db.SaveChanges();
     }
 }
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

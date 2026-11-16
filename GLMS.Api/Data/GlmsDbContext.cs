@@ -12,6 +12,7 @@ namespace GLMS.Api.Data
         public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
         public DbSet<ContractAuditLog> ContractAuditLogs => Set<ContractAuditLog>();
         public DbSet<ManagerAlert> ManagerAlerts => Set<ManagerAlert>();
+        public DbSet<AppUser> Users => Set<AppUser>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,7 @@ namespace GLMS.Api.Data
                 .Property(s => s.Status)
                 .HasConversion<string>()
                 .HasMaxLength(20);
+            modelBuilder.Entity<AppUser>().HasIndex(u => u.Username).IsUnique();
 
             // Sample data so the search and workflow can be tested straight away
             modelBuilder.Entity<Client>().HasData(
